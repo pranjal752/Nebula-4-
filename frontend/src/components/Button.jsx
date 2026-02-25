@@ -1,4 +1,3 @@
-import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 export function Button({ className, variant = 'primary', size = 'default', ...props }) {

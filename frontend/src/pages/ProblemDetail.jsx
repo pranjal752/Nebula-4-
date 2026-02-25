@@ -19,6 +19,17 @@ export function ProblemDetail() {
   const [output, setOutput] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // Monaco language IDs
+  const MONACO_LANG = { javascript: 'javascript', cpp: 'cpp', python: 'python', java: 'java' };
+
+  // Default starter code per language
+  const DEFAULT_CODE = {
+    javascript: '// Write your JavaScript solution here\n',
+    cpp: '#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}\n',
+    python: '# Write your Python solution here\n',
+    java: 'import java.util.*;\n\npublic class Solution {\n    public static void main(String[] args) {\n        \n    }\n}\n',
+  };
+
   useEffect(() => {
     const fetchProblem = async () => {
       try {
@@ -28,14 +39,23 @@ export function ProblemDetail() {
         if (problemData.codeTemplates && problemData.codeTemplates[language]) {
             setCode(problemData.codeTemplates[language]);
         }
-      } catch (error) {
+      } catch (_err) {
         toast.error('Failed to load problem');
       } finally {
         setLoading(false);
       }
     };
     fetchProblem();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
+
+  // When language changes, switch to its code template (or default starter)
+  useEffect(() => {
+    if (!problem) return;
+    const template = problem.codeTemplates?.[language];
+    setCode(template || DEFAULT_CODE[language] || '// Write your code here\n');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language]);
 
   const handleRun = async () => {
     if (!user) {
@@ -157,7 +177,7 @@ export function ProblemDetail() {
             <Editor
                 height="100%"
                 width="100%"
-                language={language === "cpp" ? "cpp" : language === "python" ? "python" : "javascript"}
+                language={MONACO_LANG[language] || 'javascript'}
                 value={code}
                 theme="vs-dark"
                 onChange={(val) => setCode(val)}

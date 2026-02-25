@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 export function Home() {
   return (
     <div className="flex flex-col items-center justify-center py-20">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -50,13 +50,14 @@ export function Home() {
 }
 
 function FeatureCard({ icon: Icon, title, description }) {
+  const FeatureIcon = Icon;
   return (
-    <motion.div 
+    <motion.div
       whileHover={{ y: -5 }}
       className="p-6 rounded-2xl bg-surface border border-white/5 hover:border-primary/30 transition-colors"
     >
       <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-        <Icon className="h-6 w-6 text-primary" />
+        <FeatureIcon className="h-6 w-6 text-primary" />
       </div>
       <h3 className="text-xl font-semibold mb-2">{title}</h3>
       <p className="text-textMuted">{description}</p>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/Button';
@@ -8,15 +8,19 @@ export function Register() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { register } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { register, user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) navigate('/dashboard', { replace: true });
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await register({ username, email, password });
-    if (success) {
-      navigate('/dashboard');
-    }
+    setIsSubmitting(true);
+    await register({ username, email, password });
+    setIsSubmitting(false);
   };
 
   return (
@@ -54,8 +58,8 @@ export function Register() {
               required
             />
           </div>
-          <Button type="submit" className="w-full mt-2 font-bold bg-primary text-black hover:bg-primaryHover">
-            Register
+          <Button type="submit" disabled={isSubmitting} className="w-full mt-2 font-bold bg-primary text-black hover:bg-primaryHover">
+            {isSubmitting ? 'Creating account...' : 'Register'}
           </Button>
         </form>
         <p className="mt-4 text-center text-sm text-textMuted">

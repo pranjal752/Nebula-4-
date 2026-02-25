@@ -1,22 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
-import { toast } from 'react-hot-toast';
 
 export function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { login, user } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect once user state is actually set — avoids race between setState and navigate
+  useEffect(() => {
+    if (user) navigate('/dashboard', { replace: true });
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await login(email, password);
-    if (success) {
-      navigate('/dashboard');
-    }
+    setIsSubmitting(true);
+    await login(email, password);
+    setIsSubmitting(false);
+    // navigation is handled by the useEffect above
   };
 
   return (
@@ -44,8 +49,8 @@ export function Login() {
               required
             />
           </div>
-          <Button type="submit" className="w-full mt-2 font-bold bg-primary text-black hover:bg-primaryHover">
-            Sign In
+          <Button type="submit" disabled={isSubmitting} className="w-full mt-2 font-bold bg-primary text-black hover:bg-primaryHover">
+            {isSubmitting ? 'Signing in...' : 'Sign In'}
           </Button>
         </form>
         <p className="mt-4 text-center text-sm text-textMuted">

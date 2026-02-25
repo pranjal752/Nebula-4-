@@ -92,10 +92,11 @@ export function Dashboard() {
 }
 
 function StatsCard({ title, value, icon: Icon, className }) {
+    const CardIcon = Icon;
     return (
         <Card className="flex items-center gap-4">
             <div className={`p-3 rounded-full bg-surface ${className}`}>
-                <Icon className="h-6 w-6" />
+                <CardIcon className="h-6 w-6" />
             </div>
             <div>
                 <p className="text-sm text-textMuted">{title}</p>
