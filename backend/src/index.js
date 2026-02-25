@@ -11,6 +11,15 @@ import { Server as SocketIO } from 'socket.io';
 import connectDB from './config/db.js';
 import { apiLimiter } from './middleware/rateLimiter.middleware.js';
 
+// ─── Validate required environment variables at startup ───────────────────────
+const REQUIRED_ENV = ['MONGO_URI', 'JWT_SECRET', 'JWT_REFRESH_SECRET'];
+const missing = REQUIRED_ENV.filter((key) => !process.env[key]);
+if (missing.length > 0) {
+  console.error(`\n❌ Missing required environment variables: ${missing.join(', ')}`);
+  console.error('   Set them in your .env file or deployment dashboard.\n');
+  process.exit(1);
+}
+
 // Routes
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';

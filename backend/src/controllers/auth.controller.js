@@ -44,6 +44,10 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return sendError(res, 'Email and password are required.', 400);
+    }
+
     const user = await User.findOne({ email }).select('+password +refreshTokens');
     if (!user || !(await user.comparePassword(password))) {
       return sendError(res, 'Invalid email or password.', 401);
@@ -66,7 +70,8 @@ export const login = async (req, res) => {
 
     return sendSuccess(res, { user: user.toJSON(), accessToken }, 'Login successful.');
   } catch (error) {
-    return sendError(res, 'Login failed.', 500);
+    console.error('Login error:', error.message);
+    return sendError(res, 'Login failed. Please try again.', 500);
   }
 };
 

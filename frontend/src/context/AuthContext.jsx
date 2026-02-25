@@ -14,17 +14,30 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const { data } = await api.get('/auth/me'); // Assuming endpoint exists
-          const payload = data.data || data;
-          setUser(payload.user);
-        } catch (error) {
-          console.error("Auth check failed", error);
-          localStorage.removeItem('token');
-        }
+      if (!token) {
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+      try {
+        const { data } = await api.get('/auth/me');
+        const payload = data.data || data;
+        setUser(payload.user);
+      } catch (error) {
+        // Only clear token on explicit auth errors (401/403), not network/server errors
+        const status = error.response?.status;
+        if (status === 401 || status === 403) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        } else {
+          // Network error or 500 — restore user from localStorage cache
+          const cached = localStorage.getItem('user');
+          if (cached) {
+            try { setUser(JSON.parse(cached)); } catch (_) { /* ignore */ }
+          }
+        }
+      } finally {
+        setLoading(false);
+      }
     };
     checkAuth();
   }, []);
@@ -57,14 +70,17 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const { data } = await api.post('/auth/register', userData);
-      
+
       const payload = data.data || data;
       const token = payload.accessToken || payload.token;
       const user = payload.user;
 
       if (token) localStorage.setItem('token', token);
-      if (user) setUser(user);
-      
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
+        setUser(user);
+      }
+
       toast.success('Account created successfully!');
       return true;
     } catch (error) {
