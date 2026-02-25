@@ -9,7 +9,11 @@ import Problem from './models/Problem.js';
 import connectDB from './config/db.js';
 import { DEFAULT_CODE_TEMPLATES, DIFFICULTY_POINTS } from './config/constants.js';
 
+// ─── 100+ Problems ────────────────────────────────────────────────────────────
 const SAMPLE_PROBLEMS = [
+
+  // ═══════════════════════════════ EASY ═══════════════════════════════════════
+
   {
     title: 'Two Sum',
     description: `Given an array of integers \`nums\` and an integer \`target\`, return *indices* of the two numbers such that they add up to target.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.\n\nYou can return the answer in any order.`,
