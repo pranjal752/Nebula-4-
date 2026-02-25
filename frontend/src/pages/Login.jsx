@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
+import { Code2, Mail, Lock, Loader2 } from 'lucide-react';
 
 export function Login() {
   const [email, setEmail] = useState('');
@@ -25,40 +26,62 @@ export function Login() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="w-full max-w-md p-8 bg-surface rounded-xl border border-white/5 shadow-2xl">
-        <h2 className="text-3xl font-bold mb-6 text-center text-white">Welcome Back</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-textMuted mb-1">Email</label>
-            <Input
-              type="email"
-              placeholder="name@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+    <div className="flex items-center justify-center min-h-[65vh]">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="flex justify-center mb-8">
+          <div className="h-14 w-14 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center">
+            <Code2 className="h-7 w-7 text-primary" />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-textMuted mb-1">Password</label>
-            <Input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+        </div>
+
+        <div className="p-8 bg-surface rounded-2xl border border-white/5 shadow-2xl shadow-black/30">
+          <h2 className="text-2xl font-black mb-1 text-center text-white">Welcome Back</h2>
+          <p className="text-sm text-textMuted text-center mb-6">Sign in to your Hash4 Arena account</p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-textMuted mb-2">Email</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-textMuted" />
+                <Input
+                  type="email"
+                  placeholder="name@example.com"
+                  className="pl-10"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-textMuted mb-2">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-textMuted" />
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  className="pl-10"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <Button type="submit" disabled={isSubmitting} className="w-full mt-2 font-bold bg-primary text-black hover:bg-primaryHover h-11">
+              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Sign In'}
+            </Button>
+          </form>
+
+          <div className="mt-6 pt-6 border-t border-white/5 text-center">
+            <p className="text-sm text-textMuted">
+              Don't have an account?{' '}
+              <Link to="/register" className="text-primary hover:underline font-medium">
+                Create one
+              </Link>
+            </p>
           </div>
-          <Button type="submit" disabled={isSubmitting} className="w-full mt-2 font-bold bg-primary text-black hover:bg-primaryHover">
-            {isSubmitting ? 'Signing in...' : 'Sign In'}
-          </Button>
-        </form>
-        <p className="mt-4 text-center text-sm text-textMuted">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-primary hover:underline">
-            Register here
-          </Link>
-        </p>
+        </div>
       </div>
     </div>
   );

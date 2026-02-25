@@ -43,11 +43,13 @@ export function Contests() {
 
   return (
     <div className="container mx-auto max-w-5xl py-8">
-      <div className="flex items-center gap-3 mb-6">
-        <Trophy className="h-8 w-8 text-primary" />
+      <div className="flex items-center gap-3 mb-8">
+        <div className="h-12 w-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+          <Trophy className="h-6 w-6 text-primary" />
+        </div>
         <div>
-          <h1 className="text-3xl font-bold">Contests</h1>
-          <p className="text-textMuted text-sm mt-0.5">{contests.length} contests total</p>
+          <h1 className="text-3xl font-black">Contests</h1>
+          <p className="text-textMuted text-sm mt-0.5">{contests.length} contests · Compete with the best</p>
         </div>
       </div>
 

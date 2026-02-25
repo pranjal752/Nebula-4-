@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from './Button';
-import { Code2, Trophy, List, LayoutDashboard, LogOut, ChevronDown, History } from 'lucide-react';
+import { Code2, Trophy, List, LayoutDashboard, LogOut, ChevronDown, History, Menu, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useState, useRef, useEffect } from 'react';
 
@@ -9,6 +9,7 @@ export function Navbar() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   const links = [
@@ -29,8 +30,14 @@ export function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
+
   const handleLogout = () => {
     setDropdownOpen(false);
+    setMobileOpen(false);
     logout();
   };
 
@@ -38,12 +45,14 @@ export function Navbar() {
     <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-background/80 backdrop-blur-md">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-8">
-          <Link to="/" className="flex items-center gap-2 font-bold text-xl tracking-tight text-white hover:text-primary transition-colors">
-            <Code2 className="h-6 w-6 text-primary" />
+          <Link to="/" className="flex items-center gap-2.5 font-bold text-xl tracking-tight text-white hover:text-primary transition-colors">
+            <div className="h-8 w-8 rounded-lg bg-primary/15 border border-primary/30 flex items-center justify-center">
+              <Code2 className="h-5 w-5 text-primary" />
+            </div>
             <span>Hash4 Arena</span>
           </Link>
 
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-1">
             {links.map((link) => {
               const Icon = link.icon;
               const isActive = location.pathname === link.path || location.pathname.startsWith(link.path + '/');
@@ -52,8 +61,10 @@ export function Navbar() {
                   key={link.path}
                   to={link.path}
                   className={clsx(
-                    "flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary",
-                    isActive ? "text-primary" : "text-textMuted"
+                    "flex items-center gap-2 text-sm font-medium transition-all px-3 py-2 rounded-lg",
+                    isActive
+                      ? "text-primary bg-primary/10"
+                      : "text-textMuted hover:text-white hover:bg-white/5"
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -64,7 +75,7 @@ export function Navbar() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {user ? (
             <div className="relative" ref={dropdownRef}>
               <button
@@ -79,7 +90,7 @@ export function Navbar() {
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-52 rounded-xl border border-white/10 bg-surface shadow-2xl shadow-black/50 overflow-hidden">
+                <div className="absolute right-0 mt-2 w-52 rounded-xl border border-white/10 bg-surface shadow-2xl shadow-black/50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="px-4 py-3 border-b border-white/5">
                     <p className="text-xs text-textMuted">Signed in as</p>
                     <p className="text-sm font-bold text-white truncate">{user.username}</p>
@@ -113,7 +124,7 @@ export function Navbar() {
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2">
               <Link to="/login">
                 <Button variant="ghost" size="sm">Login</Button>
               </Link>
@@ -122,8 +133,53 @@ export function Navbar() {
               </Link>
             </div>
           )}
+
+          {/* Mobile menu toggle */}
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="md:hidden p-2 rounded-lg text-textMuted hover:text-white hover:bg-white/5 transition-colors"
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div className="md:hidden border-t border-white/5 bg-surface/95 backdrop-blur-md">
+          <div className="container mx-auto px-4 py-4 space-y-1">
+            {links.map((link) => {
+              const Icon = link.icon;
+              const isActive = location.pathname === link.path;
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={clsx(
+                    "flex items-center gap-3 text-sm font-medium transition-all px-4 py-3 rounded-lg",
+                    isActive
+                      ? "text-primary bg-primary/10"
+                      : "text-textMuted hover:text-white hover:bg-white/5"
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {link.name}
+                </Link>
+              );
+            })}
+            {!user && (
+              <div className="flex items-center gap-2 pt-3 border-t border-white/5 mt-3">
+                <Link to="/login" className="flex-1">
+                  <Button variant="ghost" size="sm" className="w-full">Login</Button>
+                </Link>
+                <Link to="/register" className="flex-1">
+                  <Button variant="primary" size="sm" className="w-full text-black font-bold">Sign Up</Button>
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

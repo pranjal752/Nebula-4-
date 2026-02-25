@@ -39,14 +39,14 @@ export function Problems() {
 
   return (
     <div className="container mx-auto max-w-5xl py-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
+          <h1 className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
             Problems
           </h1>
-          <p className="text-textMuted text-sm mt-1">{problems.length} problems total</p>
+          <p className="text-textMuted text-sm mt-1">{problems.length} problems available · {filteredProblems.length} showing</p>
         </div>
-        <div className="relative w-64">
+        <div className="relative w-full md:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-textMuted" />
             <Input 
                 placeholder="Search problems..." 
@@ -88,7 +88,7 @@ export function Problems() {
           <span>{error}</span>
         </div>
       ) : (
-        <div className="bg-surface rounded-lg border border-white/5 overflow-hidden">
+        <div className="bg-surface rounded-xl border border-white/5 overflow-hidden">
           <div className="grid grid-cols-12 gap-4 p-4 text-xs font-bold text-textMuted uppercase tracking-wider border-b border-white/5 bg-black/20">
             <div className="col-span-1">#</div>
             <div className="col-span-6">Title</div>
