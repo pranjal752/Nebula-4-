@@ -40,7 +40,7 @@ export function Navbar() {
         <div className="flex items-center gap-8">
           <Link to="/" className="flex items-center gap-2 font-bold text-xl tracking-tight text-white hover:text-primary transition-colors">
             <Code2 className="h-6 w-6 text-primary" />
-            <span>NEBULA</span>
+            <span>Hash4 Arena</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-6">

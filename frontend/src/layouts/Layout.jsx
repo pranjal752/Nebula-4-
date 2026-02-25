@@ -9,7 +9,7 @@ export function Layout() {
         <Outlet />
       </main>
       <footer className="border-t border-white/10 py-6 text-center text-sm text-textMuted">
-        <p>&copy; {new Date().getFullYear()} Nebula. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Hash4 Arena. All rights reserved.</p>
       </footer>
     </div>
   );
