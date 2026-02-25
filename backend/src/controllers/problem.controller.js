@@ -92,11 +92,10 @@ export const createProblem = async (req, res) => {
     const lastProblem = await Problem.findOne().sort({ problemNumber: -1 });
     const problemNumber = (lastProblem?.problemNumber || 0) + 1;
 
-    // Merge custom templates with defaults
+    // Merge custom templates with defaults (uses top-level import)
     const finalTemplates = {};
-    const { DEFAULT_CODE_TEMPLATES: defaults } = await import('../config/constants.js');
-    Object.keys(defaults).forEach((lang) => {
-      finalTemplates[lang] = (codeTemplates?.[lang]) || defaults[lang];
+    Object.keys(DEFAULT_CODE_TEMPLATES).forEach((lang) => {
+      finalTemplates[lang] = codeTemplates?.[lang] || DEFAULT_CODE_TEMPLATES[lang];
     });
 
     const problem = await Problem.create({

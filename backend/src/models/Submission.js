@@ -17,13 +17,11 @@ const submissionSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-      index: true,
     },
     problem: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Problem',
       required: true,
-      index: true,
     },
     contest: {
       type: mongoose.Schema.Types.ObjectId,
@@ -84,10 +82,11 @@ const submissionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-submissionSchema.index({ user: 1, problem: 1 });
-submissionSchema.index({ problem: 1, verdict: 1 });
-submissionSchema.index({ contest: 1 });
-submissionSchema.index({ createdAt: -1 });
+submissionSchema.index({ user: 1, createdAt: -1 });       // user submission history
+submissionSchema.index({ user: 1, problem: 1 });           // has user solved this problem?
+submissionSchema.index({ problem: 1, verdict: 1 });        // problem stats
+submissionSchema.index({ contest: 1, user: 1 });           // contest leaderboard lookups
+submissionSchema.index({ createdAt: -1 });                 // global recent feed
 
 const Submission = mongoose.model('Submission', submissionSchema);
 export default Submission;

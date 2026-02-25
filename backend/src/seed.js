@@ -131,7 +131,7 @@ async function seed() {
   console.log(`✅ Admin created: admin@nebula.dev / Admin@1234`);
 
   // Create test users
-  const testUsers = await User.create([
+  await User.create([
     {
       username: 'alice',
       email: 'alice@nebula.dev',
@@ -147,7 +147,7 @@ async function seed() {
       bio: 'Software engineer',
     },
   ]);
-  console.log(`✅ Test users created (alice, bob) — password: Test@1234`);
+  console.log(` Test users created (alice, bob) — password: Test@1234`);
 
   // Create problems
   for (let i = 0; i < SAMPLE_PROBLEMS.length; i++) {

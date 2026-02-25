@@ -1,10 +1,18 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.css'
+import './main.css'
 import App from './App.jsx'
+import { Toaster } from 'react-hot-toast';
 
-createRoot(document.getElementById('root')).render(
+const root = createRoot(document.getElementById('root'));
+root.render(
   <StrictMode>
     <App />
+    <Toaster position="top-center" toastOptions={{
+      style: {
+        background: '#333',
+        color: '#fff',
+      },
+    }}/>
   </StrictMode>,
-)
+);

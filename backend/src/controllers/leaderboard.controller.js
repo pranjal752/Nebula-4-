@@ -6,7 +6,8 @@ export const getGlobalLeaderboard = async (req, res) => {
   try {
     const { page, limit, skip } = getPaginationParams(req.query);
 
-    const total = await User.countDocuments({ isActive: true, 'stats.totalSolved': { $gt: 0 } });
+    // Use same filter for total and data so pagination is consistent
+    const total = await User.countDocuments({ isActive: true });
     const users = await User.find({ isActive: true })
       .select('username avatar country stats rank createdAt')
       .sort({

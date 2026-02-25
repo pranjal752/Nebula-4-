@@ -1,14 +1,11 @@
 import axios from 'axios';
 import { LANGUAGES, JUDGE0_STATUS, VERDICTS } from '../config/constants.js';
 
-const JUDGE0_URL = process.env.JUDGE0_API_URL || 'https://judge0-ce.p.rapidapi.com';
-const JUDGE0_KEY = process.env.JUDGE0_API_KEY;
-const JUDGE0_HOST = process.env.JUDGE0_API_HOST || 'judge0-ce.p.rapidapi.com';
+// Free public Judge0 CE instance — no API key required
+const JUDGE0_URL = process.env.JUDGE0_API_URL || 'https://ce.judge0.com';
 
 const judge0Headers = {
   'content-type': 'application/json',
-  'X-RapidAPI-Key': JUDGE0_KEY,
-  'X-RapidAPI-Host': JUDGE0_HOST,
 };
 
 /**
@@ -28,7 +25,7 @@ export const submitToJudge0 = async ({ code, languageKey, stdin, timeLimit, memo
   };
 
   const response = await axios.post(
-    `${JUDGE0_URL}/submissions?base64_encoded=true&wait=false`,
+    `${JUDGE0_URL}/submissions?base64_encoded=true&wait=false&fields=token`,
     payload,
     { headers: judge0Headers, timeout: 15000 }
   );
@@ -41,7 +38,7 @@ export const submitToJudge0 = async ({ code, languageKey, stdin, timeLimit, memo
  */
 export const getJudge0Result = async (token) => {
   const response = await axios.get(
-    `${JUDGE0_URL}/submissions/${token}?base64_encoded=true`,
+    `${JUDGE0_URL}/submissions/${token}?base64_encoded=true&fields=stdout,stderr,compile_output,status,time,memory`,
     { headers: judge0Headers, timeout: 10000 }
   );
   return response.data;
@@ -95,7 +92,8 @@ const pollResults = async (tokens, testCases, maxAttempts = 20, interval = 1500)
 
       const tc = testCases[idx];
       const stdout = raw.stdout ? Buffer.from(raw.stdout, 'base64').toString().trim() : '';
-      const expectedOutput = (tc.output || '').trim();
+      // tc.output === null means custom-input run — skip output comparison
+      const expectedOutput = tc.output == null ? null : (tc.output || '').trim();
       const stderr = raw.stderr ? Buffer.from(raw.stderr, 'base64').toString().trim() : '';
       const compileOutput = raw.compile_output
         ? Buffer.from(raw.compile_output, 'base64').toString().trim()
@@ -103,7 +101,11 @@ const pollResults = async (tokens, testCases, maxAttempts = 20, interval = 1500)
 
       let verdict;
       if (statusId === 3) {
-        verdict = stdout === expectedOutput ? VERDICTS.ACCEPTED : VERDICTS.WRONG_ANSWER;
+        if (expectedOutput === null) {
+          verdict = 'Executed'; // custom input — no comparison
+        } else {
+          verdict = stdout === expectedOutput ? VERDICTS.ACCEPTED : VERDICTS.WRONG_ANSWER;
+        }
       } else {
         verdict = JUDGE0_STATUS[statusId] || VERDICTS.RUNTIME_ERROR;
       }
@@ -111,7 +113,7 @@ const pollResults = async (tokens, testCases, maxAttempts = 20, interval = 1500)
       results[idx] = {
         testCaseIndex: idx,
         input: tc.input,
-        expectedOutput,
+        expectedOutput: expectedOutput ?? '',
         actualOutput: stdout,
         verdict,
         runtime: parseFloat(raw.time || '0') * 1000, // ms

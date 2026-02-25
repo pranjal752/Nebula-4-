@@ -4,7 +4,7 @@ import User from '../models/User.js';
 import Contest from '../models/Contest.js';
 import { sendSuccess, sendError, sendPaginated, getPaginationParams } from '../utils/response.js';
 import { runAllTestCases, deriveVerdict } from '../services/judge.service.js';
-import { VERDICTS, DIFFICULTY_POINTS } from '../config/constants.js';
+import { VERDICTS } from '../config/constants.js';
 
 // POST /api/submissions  — Submit code
 export const submitCode = async (req, res) => {
@@ -47,8 +47,9 @@ export const submitCode = async (req, res) => {
       data: { submissionId: submission._id, verdict: VERDICTS.PENDING },
     });
 
-    // Run judge asynchronously
-    runJudge(submission, problem, req.user._id, contestId).catch((err) => {
+    // Run judge asynchronously, pass Socket.IO instance for real-time updates
+    const io = req.app.get('io');
+    runJudge(submission, problem, req.user._id, contestId, io).catch((err) => {
       console.error('Judge error:', err.message);
     });
   } catch (error) {
@@ -65,9 +66,10 @@ export const runCode = async (req, res) => {
     const problem = await Problem.findOne({ slug: problemSlug, isActive: true });
     if (!problem) return sendError(res, 'Problem not found.', 404);
 
-    const testCases = customInput
-      ? [{ input: customInput, output: '', isHidden: false }]
-      : problem.sampleTestCases.slice(0, 3); // run against first 3 sample cases
+    const isCustom = Boolean(customInput);
+    const testCases = isCustom
+      ? [{ input: customInput, output: null, isHidden: false }]  // null = skip output comparison
+      : problem.sampleTestCases.slice(0, 3);
 
     const results = await runAllTestCases({
       code,
@@ -76,6 +78,13 @@ export const runCode = async (req, res) => {
       timeLimit: problem.timeLimit,
       memoryLimit: problem.memoryLimit,
     });
+
+    // For custom input: don't show a misleading Wrong Answer — just show raw output
+    if (isCustom) {
+      results.forEach((r) => {
+        if (r.verdict === VERDICTS.WRONG_ANSWER) r.verdict = 'Executed';
+      });
+    }
 
     return sendSuccess(res, { results });
   } catch (error) {
@@ -138,7 +147,7 @@ export const getSubmissions = async (req, res) => {
 };
 
 // ----- Internal judge runner -----
-async function runJudge(submission, problem, userId, contestId) {
+async function runJudge(submission, problem, userId, contestId, io) {
   try {
     const allTestCases = [
       ...problem.sampleTestCases,
@@ -168,6 +177,18 @@ async function runJudge(submission, problem, userId, contestId) {
       totalTestCases: allTestCases.length,
       compileOutput: compileError?.stderr || '',
     });
+
+    // Emit real-time verdict update to the submitting client
+    if (io) {
+      io.to(`submission:${submission._id}`).emit('verdict', {
+        submissionId: submission._id,
+        verdict,
+        runtime: maxRuntime,
+        memory: maxMemory,
+        passedTestCases: passedCount,
+        totalTestCases: allTestCases.length,
+      });
+    }
 
     // Update problem accepted count
     if (verdict === VERDICTS.ACCEPTED) {
@@ -222,10 +243,6 @@ async function runJudge(submission, problem, userId, contestId) {
       if (contestId) {
         await updateContestScore(contestId, userId, problem._id, submission._id);
       }
-    } else {
-      await User.findByIdAndUpdate(userId, {
-        $inc: { 'stats.acceptedSubmissions': 0 },
-      });
     }
   } catch (err) {
     console.error('runJudge error:', err);
@@ -233,6 +250,12 @@ async function runJudge(submission, problem, userId, contestId) {
       verdict: VERDICTS.RUNTIME_ERROR,
       compileOutput: err.message,
     });
+    if (io) {
+      io.to(`submission:${submission._id}`).emit('verdict', {
+        submissionId: submission._id,
+        verdict: VERDICTS.RUNTIME_ERROR,
+      });
+    }
   }
 }
 

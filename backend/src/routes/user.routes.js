@@ -15,13 +15,13 @@ const router = Router();
 // Admin only
 router.get('/', protect, requireAdmin, getAllUsers);
 
+// Protected (must be before /:username to avoid param shadowing)
+router.put('/profile', protect, updateProfile);
+router.put('/change-password', protect, changePassword);
+
 // Public
 router.get('/:username', getPublicProfile);
 router.get('/:username/submissions', getUserSubmissions);
 router.get('/:username/stats', getUserStats);
-
-// Protected
-router.put('/profile', protect, updateProfile);
-router.put('/change-password', protect, changePassword);
 
 export default router;

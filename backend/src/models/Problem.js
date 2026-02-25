@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
 const testCaseSchema = new mongoose.Schema({
-  input: { type: String, required: true },
-  output: { type: String, required: true },
+  input: { type: String, default: '' },
+  output: { type: String, default: '' },  // empty string is valid (e.g. empty output edge cases)
   isHidden: { type: Boolean, default: false },
   explanation: { type: String, default: '' },
 });

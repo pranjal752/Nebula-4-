@@ -13,23 +13,36 @@ export const getContests = async (req, res) => {
     const now = new Date();
     let filter = { isPublic: true };
 
-    if (status === 'upcoming') filter.startTime = { $gt: now };
-    else if (status === 'ongoing') filter.startTime = { $lte: now }, filter.endTime = { $gte: now };
-    else if (status === 'ended') filter.endTime = { $lt: now };
+    if (status === 'upcoming') {
+      filter.startTime = { $gt: now };
+    } else if (status === 'ongoing') {
+      filter.startTime = { $lte: now };
+      filter.endTime = { $gte: now };
+    } else if (status === 'ended') {
+      filter.endTime = { $lt: now };
+    }
 
     const total = await Contest.countDocuments(filter);
     const contests = await Contest.find(filter)
       .populate('createdBy', 'username')
-      .select('-participants -problems.problem')
+      // Keep startTime/endTime so currentStatus virtual works; exclude heavy fields
+      .select('-problems -participants')
       .sort({ startTime: -1 })
       .skip(skip)
       .limit(limit);
+
+    // participantCount via separate aggregate to avoid loading full participants array
+    const participantCounts = await Contest.aggregate([
+      { $match: filter },
+      { $project: { count: { $size: '$participants' } } },
+    ]);
+    const countMap = Object.fromEntries(participantCounts.map((c) => [c._id.toString(), c.count]));
 
     // Compute live status
     const enriched = contests.map((c) => ({
       ...c.toJSON(),
       liveStatus: c.currentStatus,
-      participantCount: c.participants?.length || 0,
+      participantCount: countMap[c._id.toString()] || 0,
     }));
 
     return sendPaginated(res, enriched, { total, page, limit, pages: Math.ceil(total / limit) });
