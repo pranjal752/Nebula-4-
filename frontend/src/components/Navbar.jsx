@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from './Button';
-import { Code2, Trophy, List, LayoutDashboard, LogOut, ChevronDown, History, User } from 'lucide-react';
+import { Code2, Trophy, List, LayoutDashboard, LogOut, ChevronDown, History } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useState, useRef, useEffect } from 'react';
 
