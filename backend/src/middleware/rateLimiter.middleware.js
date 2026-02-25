@@ -10,10 +10,10 @@ const createLimiter = (windowMs, max, message) =>
     handler: (req, res) => sendError(res, message, 429),
   });
 
-// Auth endpoints: 10 requests per 15 minutes
+// Auth endpoints: 50 requests per 15 minutes
 export const authLimiter = createLimiter(
   15 * 60 * 1000,
-  10,
+  50,
   'Too many authentication attempts. Please try again after 15 minutes.'
 );
 
